@@ -201,7 +201,7 @@ def protected():
     if not user:
         return jsonify({"error": "User not found"}), 404
     return jsonify({
-        "message": f"Hello {user.email}! This is a protected route.",
+        "email": user.email,
         "user_since": user.created_at.strftime("%Y-%m-%d %H:%M:%S"),
     })
 
