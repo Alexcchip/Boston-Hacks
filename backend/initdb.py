@@ -8,7 +8,7 @@ load_dotenv()
 # Retrieve database configuration from environment variables
 DB_NAME = os.getenv("DB_NAME")
 AWS_REGION = os.getenv("AWS_REGION")
-DB_ENDPOINT = os.getenv("DB_ENDPOINT")
+DB_ENDPOINT = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT")
 DB_USER = os.getenv("DB_USER")
 DB_PASSWORD = os.getenv("DB_PASSWORD")
@@ -25,6 +25,9 @@ connection = psycopg2.connect(
 cursor = connection.cursor()
 
 try:
+    cursor.execute("""
+    DROP TABLE IF EXISTS Users CASCADE;
+    """)
     # Create Teams table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Teams (
@@ -40,9 +43,10 @@ try:
     CREATE TABLE IF NOT EXISTS Users (
         user_id SERIAL PRIMARY KEY,
         email VARCHAR(320) UNIQUE NOT NULL,
-        password_hash VARCHAR(255) NOT NULL,
-        display_name VARCHAR(100) NOT NULL,
-        team_id INT REFERENCES Teams(team_id) ON DELETE SET NULL
+        password VARCHAR(255) NOT NULL,
+        username VARCHAR(100) NOT NULL,
+        team_id INT REFERENCES Teams(team_id) ON DELETE SET NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
 
