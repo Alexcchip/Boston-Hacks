@@ -14,18 +14,7 @@ import os
 import sys
 from sqlalchemy import text
 from flasgger import Swagger
-
-def create_app():
-    app = Flask(__name__)
-    CORS(app)
-
-    # Initialize Swagger
- 
-
-    # Rest of your setup...
-    # JWT configuration, database setup, etc.
-
-    return app
+from task_routes import task_routes
 
 # Load environment variables
 load_dotenv()
@@ -71,7 +60,18 @@ def create_app():
     jwt = JWTManager(app)
     db.init_app(app)
 
+    app.register_blueprint(task_routes)  # Register the task routes
+
+    app.config['SWAGGER'] = {
+        'title': 'Astronaut Task API',
+        'uiversion': 3,
+        'openapi': '3.0.2'
+    }
+
+    
+
     swagger = Swagger(app)  
+
 
     # # Create tables
     # try:
