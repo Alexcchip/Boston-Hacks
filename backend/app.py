@@ -13,6 +13,19 @@ from dotenv import load_dotenv
 import os
 import sys
 from sqlalchemy import text
+from flasgger import Swagger
+
+def create_app():
+    app = Flask(__name__)
+    CORS(app)
+
+    # Initialize Swagger
+ 
+
+    # Rest of your setup...
+    # JWT configuration, database setup, etc.
+
+    return app
 
 # Load environment variables
 load_dotenv()
@@ -22,6 +35,7 @@ def create_app():
     
     # Configure CORS
     CORS(app)
+
     
     # Database Configuration for PostgreSQL
     DB_USER = os.getenv('DB_USER')
@@ -56,15 +70,17 @@ def create_app():
     # Initialize extensions
     jwt = JWTManager(app)
     db.init_app(app)
-    
-    # Create tables
-    try:
-        with app.app_context():
-            db.create_all()
-            print("Successfully connected to the database and created tables.")
-    except Exception as e:
-        print(f"Error connecting to database: {str(e)}")
-        sys.exit(1)
+
+    swagger = Swagger(app)  
+
+    # # Create tables
+    # try:
+    #     with app.app_context():
+    #         db.create_all()
+    #         print("Successfully connected to the database and created tables.")
+    # except Exception as e:
+    #     print(f"Error connecting to database: {str(e)}")
+    #     sys.exit(1)
     
     return app
 
@@ -72,19 +88,53 @@ app = create_app()
 
 @app.route("/api/register", methods=["POST"])
 def register():
+    """
+    Register a new user
+    ---
+    tags:
+      - Users
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+            - password
+            - username
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+            username:
+              type: string
+    responses:
+      201:
+        description: User registered successfully
+      400:
+        description: Invalid input or user already exists
+      500:
+        description: Server error
+    """
+
     data = request.json
     email = data.get("email")
+    username = data.get("username")
     password = data.get("password")
     
-    if not email or not password:
-        return jsonify({"error": "Email and password are required"}), 400
+    # Check if required fields are provided
+    if not email or not password or not username:
+        return jsonify({"error": "Email, username, and password are required"}), 400
         
-    if User.query.filter_by(email=email).first():
-        return jsonify({"error": "Email already registered"}), 400
-        
+    # Check if the email or username is already registered
+    if User.query.filter_by(email=email).first() or User.query.filter_by(username=username).first():
+        return jsonify({"error": "Email or username already registered"}), 400
+
     try:
         hashed_password = generate_password_hash(password)
-        new_user = User(email=email, password=hashed_password)
+        new_user = User(email=email, username=username, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
         return jsonify({"message": "User registered successfully"}), 201
@@ -94,6 +144,35 @@ def register():
 
 @app.route("/api/login", methods=["POST"])
 def login():
+    """
+    User login
+    ---
+    tags:
+      - Users
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          type: object
+          required:
+            - email
+            - password
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+    responses:
+      200:
+        description: Login successful, token returned
+      400:
+        description: Missing email or password
+      401:
+        description: Invalid email or password
+      500:
+        description: Server error
+    """
     data = request.json
     email = data.get("email")
     password = data.get("password")
@@ -127,6 +206,8 @@ def get_users():
     return jsonify({"users": [user.to_dict() for user in users]})
 
 
+
+
 # Test database connection
 def test_db_connection(app):
     try:
@@ -140,8 +221,7 @@ def test_db_connection(app):
         return False
 
 if __name__ == "__main__":
-    app = create_app()
-    
+
     # Test the database connection before starting the server
     if test_db_connection(app):
         app.run(debug=True)
