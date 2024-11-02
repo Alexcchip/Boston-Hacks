@@ -13,6 +13,61 @@ S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "astronaut-app-images-bucket")
 # Create a Blueprint for task routes
 task_routes = Blueprint("task_routes", __name__)
 
+
+@task_routes.route("/api/tasks/not-completed", methods=["GET"])
+@jwt_required()
+def get_tasks_not_completed_by_user():
+    """
+    Get a list of tasks not completed by the current user.
+    ---
+    tags:
+      - Tasks
+    responses:
+      200:
+        description: List of tasks not completed by the user
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  task_id:
+                    type: integer
+                    description: ID of the task
+                  task_name:
+                    type: string
+                    description: Name of the task
+                  description:
+                    type: string
+                    description: Description of the task
+                  created_at:
+                    type: string
+                    description: Date and time the task was created
+                  points:
+                    type: integer
+                    description: Points awarded for completing the task
+      500:
+        description: Server error
+    """
+    # Get the current user's email from the JWT
+    current_user_email = get_jwt_identity()
+    user = User.query.filter_by(email=current_user_email).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    try:
+        # Get tasks not completed by the user
+        completed_task_ids = db.session.query(UserTasks.task_id).filter_by(user_id=user.user_id).subquery()
+        tasks_not_completed = Tasks.query.filter(~Tasks.task_id.in_(completed_task_ids)).all()
+
+        # Return tasks not completed
+        return jsonify([task.to_dict() for task in tasks_not_completed]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 @task_routes.route("/api/tasks", methods=["GET"])
 @jwt_required()
 def get_all_asks():
@@ -51,6 +106,11 @@ def get_all_asks():
     """
     tasks = Tasks.query.all()
     return jsonify([task.to_dict() for task in tasks]), 200
+
+
+
+
+
 
 @task_routes.route("/api/tasks/<int:task_id>", methods=["GET"])
 @jwt_required()
