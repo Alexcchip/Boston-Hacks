@@ -12,7 +12,7 @@ from models import db, User
 from dotenv import load_dotenv
 import os
 import sys
-
+from sqlalchemy import text
 
 # Load environment variables
 load_dotenv()
@@ -132,7 +132,7 @@ def test_db_connection(app):
     try:
         with app.app_context():
             # Try to execute a simple query
-            db.session.execute('SELECT 1')
+            db.session.execute(text('SELECT 1'))
             print("Database connection successful!")
             return True
     except Exception as e:
