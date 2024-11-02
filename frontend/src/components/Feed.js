@@ -1,6 +1,6 @@
 // Button.js
 import React from 'react';
-import Post from './Post';
+import Post from './post';
   
 function Feed({ posts }) {
   return (
