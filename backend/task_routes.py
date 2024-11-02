@@ -13,6 +13,44 @@ S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "astronaut-app-images-bucket")
 # Create a Blueprint for task routes
 task_routes = Blueprint("task_routes", __name__)
 
+@task_routes.route("/api/tasks", methods=["GET"])
+@jwt_required()
+def get_all_asks():
+    """
+    Get all tasks.
+    ---
+    tags:
+      - Tasks
+    responses:
+      200:
+        description: Tasks retrieved successfully
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  task_id:
+                    type: integer
+                    description: ID of the task
+                  task_name:
+                    type: string
+                    description: Name of the task
+                  description:
+                    type: string
+                    description: Description of the task
+                  created_at:
+                    type: string
+                    description: Date and time the task was created
+                  points:
+                    type: integer
+                    description: Points awarded for completing the task
+      500:
+        description: Error retrieving tasks
+    """
+    tasks = Tasks.query.all()
+    return jsonify([task.to_dict() for task in tasks]), 200
 
 @task_routes.route("/api/tasks/<int:task_id>", methods=["GET"])
 @jwt_required()
@@ -62,6 +100,7 @@ def get_task_by_id(task_id):
 
 
 @task_routes.route("/api/generate-presigned-url", methods=["POST"])
+@jwt_required()
 def generate_presigned_url():
     """
     Generate a pre-signed URL for direct upload to S3.

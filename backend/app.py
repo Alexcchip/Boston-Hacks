@@ -8,7 +8,7 @@ from flask_jwt_extended import (
     get_jwt_identity,
 )
 from datetime import timedelta
-from models import db, User
+from models import db, User, Teams
 from dotenv import load_dotenv
 import os
 import sys
@@ -71,16 +71,6 @@ def create_app():
     
 
     swagger = Swagger(app)  
-
-
-    # # Create tables
-    # try:
-    #     with app.app_context():
-    #         db.create_all()
-    #         print("Successfully connected to the database and created tables.")
-    # except Exception as e:
-    #     print(f"Error connecting to database: {str(e)}")
-    #     sys.exit(1)
     
     return app
 
@@ -93,23 +83,26 @@ def register():
     ---
     tags:
       - Users
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          required:
-            - email
-            - password
-            - username
-          properties:
-            email:
-              type: string
-            password:
-              type: string
-            username:
-              type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - email
+              - password
+              - username
+              - team_name
+            properties:
+              email:
+                type: string
+              password:
+                type: string
+              username:
+                type: string
+              team_name:
+                type: string
+                description: "Name of the team to join or create"
     responses:
       201:
         description: User registered successfully
@@ -123,25 +116,40 @@ def register():
     email = data.get("email")
     username = data.get("username")
     password = data.get("password")
+    team_name = data.get("team_name")
     
     # Check if required fields are provided
-    if not email or not password or not username:
-        return jsonify({"error": "Email, username, and password are required"}), 400
+    if not email or not password or not username or not team_name:
+        return jsonify({"error": "Email, username, password, and team name are required"}), 400
         
     # Check if the email or username is already registered
     if User.query.filter_by(email=email).first() or User.query.filter_by(username=username).first():
         return jsonify({"error": "Email or username already registered"}), 400
 
     try:
+        # Hash the password
         hashed_password = generate_password_hash(password)
-        new_user = User(email=email, username=username, password=hashed_password)
+        
+        # Check if the team already exists
+        team = Teams.query.filter_by(team_name=team_name).first()
+        
+        # If the team doesn't exist, create a new team
+        if not team:
+            team = Teams(team_name=team_name, join_id="TEAM" + str(Teams.query.count() + 1))
+            db.session.add(team)
+            db.session.flush()  # Ensures team_id is available for new_user assignment
+        
+        # Create the new user and assign to the team
+        new_user = User(email=email, username=username, password=hashed_password, team_id=team.team_id)
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({"message": "User registered successfully"}), 201
+        
+        return jsonify({"message": "User registered successfully", "team": team_name}), 201
+    
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
-
+    
 @app.route("/api/login", methods=["POST"])
 def login():
     """
@@ -149,20 +157,18 @@ def login():
     ---
     tags:
       - Users
-    parameters:
-      - name: body
-        in: body
-        required: true
-        schema:
-          type: object
-          required:
-            - email
-            - password
-          properties:
-            email:
-              type: string
-            password:
-              type: string
+    requestBody:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              email:
+                type: string
+                description: "The user's email address"
+              password:
+                type: string
+                description: "The user's password"
     responses:
       200:
         description: Login successful, token returned
