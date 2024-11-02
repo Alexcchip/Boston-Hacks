@@ -1,1 +1,7 @@
+backend/terraform/terraform/
+backend/terraform/*.tfstate
+backend/terraform/*.tfstate.backup
+backend/terraform/.terraform.lock.hcl
+backend/terraform/.terraform
 node_modules
+
