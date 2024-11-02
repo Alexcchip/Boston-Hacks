@@ -21,6 +21,7 @@ resource "aws_db_instance" "astronaut_db" {
   instance_class   = "db.t3.micro"
   allocated_storage = 20
   username         = "dbadmin"
+  publicly_accessible    = true
   password         = var.db_password  # Securely pulls from the environment
   skip_final_snapshot = true
 }
@@ -65,4 +66,5 @@ resource "aws_security_group" "api_sg" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+
 }

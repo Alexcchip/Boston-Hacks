@@ -3,5 +3,7 @@ backend/terraform/*.tfstate
 backend/terraform/*.tfstate.backup
 backend/terraform/.terraform.lock.hcl
 backend/terraform/.terraform
+.env
+env
 node_modules
 
