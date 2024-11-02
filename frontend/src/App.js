@@ -1,6 +1,11 @@
 // App.js
 import React from 'react';
 import Feed from './components/Feed';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import LoginForm from './components/auth/LoginForm';
+import SignupForm from './components/auth/SignupForm';
+import Dashboard from './pages/Dashboard';
+import PrivateRoute from './components/PrivateRoute';
 
 
 const posts = [
@@ -33,7 +38,22 @@ const posts = [
 
 function App() {
   return (
-    <Feed posts= {posts}/>
+    // <Feed posts= {posts}/>
+    <Router>
+      <Routes>
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/signup" element={<SignupForm />} />
+        <Route
+          path="/dashboard"
+          element={
+            <PrivateRoute>
+              <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route path="/" element={<LoginForm />} />
+      </Routes>
+    </Router>
   )
 }
 
