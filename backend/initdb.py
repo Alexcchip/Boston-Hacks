@@ -28,6 +28,10 @@ try:
     cursor.execute("""
     DROP TABLE IF EXISTS Users CASCADE;
     """)
+    cursor.execute("""
+    DROP TABLE IF EXISTS Teams CASCADE;
+    """)
+    
     # Create Teams table
     cursor.execute("""
     CREATE TABLE IF NOT EXISTS Teams (
@@ -36,6 +40,16 @@ try:
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         join_id VARCHAR(10) UNIQUE
     );
+    """)
+
+    # Insert realistic mock data into Teams table
+    cursor.execute("""
+    INSERT INTO Teams (team_name, join_id)
+    VALUES 
+        ('Mission Control', 'MC2023'),
+        ('Exploration Unit', 'EXPLR1'),
+        ('Research Squad', 'RSQ789'),
+        ('Engineering Crew', 'ENG456');
     """)
 
     # Create Users table
@@ -61,32 +75,25 @@ try:
     );
     """)
 
-    # Create UserTasks table to track task completion by users
+    # Insert realistic mock data into Tasks table (day-to-day tasks)
     cursor.execute("""
-    CREATE TABLE IF NOT EXISTS UserTasks (
-        user_task_id SERIAL PRIMARY KEY,
-        user_id INT NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
-        task_id INT NOT NULL REFERENCES Tasks(task_id) ON DELETE CASCADE,
-        photo_url VARCHAR(255),
-        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    );
-    """)
-
-    # Create UserPost table for posts by users
-    cursor.execute("""
-    CREATE TABLE IF NOT EXISTS UserPost (
-        post_id SERIAL PRIMARY KEY,
-        caption TEXT,
-        posted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        username VARCHAR(100) NOT NULL,
-        photo_link VARCHAR(100),
-        user_id INT REFERENCES Users(user_id) ON DELETE CASCADE
-    );
+    INSERT INTO Tasks (task_name, description, points)
+    VALUES 
+        ('Call a Family Member', 'Take 10 minutes to call a loved one back home and catch up.', 10),
+        ('Take a Shower', 'Refresh yourself with a quick shower and hygiene routine.', 5),
+        ('Chat with a Team Member', 'Have a casual chat with a teammate to build camaraderie.', 5),
+        ('Watch a Movie', 'Relax and unwind by watching a movie in the recreation area.', 10),
+        ('Write in Journal', 'Take some time to reflect and write in your personal journal.', 5),
+        ('Read a Book', 'Read a chapter of a book or an article you find interesting.', 10),
+        ('Exercise Routine', 'Complete a 30-minute physical exercise session.', 15),
+        ('Meditate', 'Spend 10 minutes meditating to maintain mental well-being.', 5),
+        ('Listen to Music', 'Take a break and listen to some of your favorite tunes.', 5),
+        ('Video Call with Friends', 'Use the video link to catch up with friends for 15 minutes.', 10);
     """)
 
     # Commit changes
     connection.commit()
-    print("Tables created successfully.")
+    print("Tables created and realistic mock data inserted successfully.")
 except Exception as e:
     print("Error connecting to the database:", e)
 
