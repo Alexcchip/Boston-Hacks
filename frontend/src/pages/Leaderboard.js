@@ -37,7 +37,7 @@ export default function Leaderboard() {
 
   const fetchTeamScores = async () => {
     try {
-      const response = await fetch('http://localhost:5000/api/teams/points', {
+      const response = await fetch('http://snapstronaut.tech/api/teams/points', {
         headers: { 'Authorization': `Bearer ${getToken()}` },
       });
       if (!response.ok) throw new Error('Failed to fetch team scores');

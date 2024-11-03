@@ -70,3 +70,5 @@ htmlcov/
 .coverage.*
 coverage.xml
 *.cover
+
+my-key.pem

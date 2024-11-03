@@ -32,7 +32,7 @@ const RocketLoader = () => (
   </div>
 );
 
-const TaskCard = ({ task, onClick, isCompleted }) => (
+const TaskCard = ({ task, onClick, isCompleted, postedBy }) => (
   <div
     onClick={onClick}
     className={`p-4 transition-all duration-300 border rounded-lg cursor-pointer 
@@ -49,6 +49,7 @@ const TaskCard = ({ task, onClick, isCompleted }) => (
         <Target className="w-5 h-5 text-blue-400" />
       )}
     </div>
+    <p className="mt-1 text-sm text-slate-400">Posted by: {postedBy}</p>
     {isCompleted ? (
       <>
         <p className="mt-2 text-sm text-slate-300">
@@ -85,13 +86,13 @@ export default function Dashboard() {
     const loadData = async () => {
       try {
         const [userResponse, recentResponse, notCompletedResponse] = await Promise.all([
-          fetch('http://localhost:5000/api/protected', {
+          fetch('http://snapstronaut.tech/api/protected', {
             headers: { 'Authorization': `Bearer ${getToken()}` }
           }),
-          fetch('http://localhost:5000/api/user-tasks/recent/5', {
+          fetch('http://snapstronaut.tech/api/user-tasks/recent/5', {
             headers: { 'Authorization': `Bearer ${getToken()}` }
           }),
-          fetch('http://localhost:5000/api/tasks/not-completed', {
+          fetch('http://snapstronaut.tech/api/tasks/not-completed', {
             headers: { 'Authorization': `Bearer ${getToken()}` }
           })
         ]);
@@ -151,7 +152,7 @@ export default function Dashboard() {
 
     try {
       // Step 1: Request a pre-signed URL for file upload
-      const presignedResponse = await fetch('http://localhost:5000/api/generate-presigned-url', {
+      const presignedResponse = await fetch('http://snapstronaut.tech/api/generate-presigned-url', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -169,7 +170,7 @@ export default function Dashboard() {
       });
 
       // Step 3: Mark task as completed
-      await fetch(`http://localhost:5000/api/tasks/${selectedTask.task_id}/complete`, {
+      await fetch(`http://snapstronaut.tech/api/tasks/${selectedTask.task_id}/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -182,10 +183,10 @@ export default function Dashboard() {
       
       // Refresh data after completion
       const [recentData, notCompletedData] = await Promise.all([
-        fetch('http://localhost:5000/api/user-tasks/recent/5', {
+        fetch('http://snapstronaut.tech/api/user-tasks/recent/5', {
           headers: { 'Authorization': `Bearer ${getToken()}` }
         }).then(res => res.json()),
-        fetch('http://localhost:5000/api/tasks/not-completed', {
+        fetch('http://snapstronaut.tech/api/tasks/not-completed', {
           headers: { 'Authorization': `Bearer ${getToken()}` }
         }).then(res => res.json())
       ]);
@@ -253,7 +254,7 @@ export default function Dashboard() {
             <div className="p-6 space-y-4 h-[400px] overflow-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
               {recentTasks.length > 0 ? (
                 recentTasks.map(task => (
-                  <TaskCard key={task.user_task_id} task={task} isCompleted={true} />
+                  <TaskCard key={task.user_task_id} task={task} isCompleted={true} postedBy={task.username || 'Unknown'}/>
                 ))
               ) : (
                 <p className="text-slate-400">No missions completed yet, astronaut!</p>

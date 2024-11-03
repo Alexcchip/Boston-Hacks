@@ -1,3 +1,5 @@
+
+
 # Define the AWS provider
 provider "aws" {
   region = "us-east-1"  
@@ -17,7 +19,7 @@ resource "aws_s3_bucket" "astronaut_images" {
   cors_rule {
     allowed_headers = ["*"]
     allowed_methods = ["GET", "PUT", "POST", "DELETE"]
-    allowed_origins = ["http://localhost:3000"]
+    allowed_origins = ["*"]
     expose_headers  = ["ETag"]
     max_age_seconds = 3000
   }
@@ -102,26 +104,131 @@ resource "aws_iam_instance_profile" "ec2_s3_instance_profile" {
   role = aws_iam_role.ec2_s3_role.name
 }
 
+# Generate a key pair for SSH access
+resource "tls_private_key" "my_key" {
+  algorithm = "RSA"
+  rsa_bits  = 2048
+}
+
+resource "aws_key_pair" "ec2_key_pair" {
+  key_name   = "my-key-pair"
+  public_key = tls_private_key.my_key.public_key_openssh
+}
+
+# Save the private key locally
+output "private_key" {
+  value     = tls_private_key.my_key.private_key_pem
+  sensitive = true  # Marks this output as sensitive, hiding it in the CLI output
+}
+
 # Create an EC2 instance for hosting the API server
 resource "aws_instance" "api_server" {
   ami                  = "ami-007868005aea67c54"  # Replace with a valid Amazon Linux AMI ID
   instance_type        = "t3.micro"
   iam_instance_profile = aws_iam_instance_profile.ec2_s3_instance_profile.name
+  security_groups      = [aws_security_group.api_sg.name]
+  key_name             = aws_key_pair.ec2_key_pair.key_name
 
-  # Security group for EC2 to allow HTTP/HTTPS access
-  security_groups = [aws_security_group.api_sg.name]
 
-  # User data for bootstrapping the server (optional)
   user_data = <<-EOF
-              #!/bin/bash
-              yum update -y
-              # Install necessary packages and start your server
-              EOF
+            #!/bin/bash
+            # Update the server
+            yum update -y
+
+            # Install Git
+            yum install -y git
+
+            # Clone the repository
+            cd /var/www
+            git clone https://github.com/Alexcchip/Boston-Hacks.git
+            git checkout prodbranch
+            git pull
+            
+
+            # Navigate to backend directory and install dependencies
+            cd /var/www/Boston-Hacks/backend
+            yum install -y python3 python3-pip
+            pip3 install --upgrade pip
+            pip3 install -r requirements.txt
+
+            # Start Gunicorn for Flask app
+            gunicorn -w 4 -b 127.0.0.1:5000 app:app --daemon
+
+            # Install Node.js and npm for the frontend
+            curl -sL https://rpm.nodesource.com/setup_16.x | bash -
+            yum install -y nodejs
+
+            # Navigate to frontend directory, install dependencies, and build
+            cd /var/www/Boston-Hacks/frontend
+            npm install
+            npm run build
+
+            # Install and configure Nginx
+            amazon-linux-extras install nginx1 -y
+            systemctl start nginx
+            systemctl enable nginx
+
+            # Copy frontend build files to Nginx html directory
+            cp -r /var/www/Boston-Hacks/frontend/build/* /usr/share/nginx/html/
+
+            # Configure Nginx to serve the backend at /api and frontend from the root
+            cat > /etc/nginx/nginx.conf <<EOL
+            events {}
+            http {
+                include /etc/nginx/mime.types;
+                server {
+                    listen 80;
+                    server_name snapstronaut.tech;  
+                    
+                    # Redirect HTTP to HTTPS
+                    return 301 https://$host$request_uri;
+                }
+
+                server {
+                    listen 443 ssl;
+                    server_name snapstronaut.tech;  
+                    
+                    # SSL certificate configuration (managed by Certbot)
+                    ssl_certificate /etc/letsencrypt/live/snapstronaut.tech/fullchain.pem;
+                    ssl_certificate_key /etc/letsencrypt/live/snapstronaut.tech/privkey.pem;
+
+                    # Serve the frontend build
+                    location / {
+                        root /usr/share/nginx/html;
+                        try_files $uri /index.html;
+                    }
+
+                    # Proxy requests to the backend
+                    location /api {
+                        proxy_pass http://127.0.0.1:5000;
+                        proxy_set_header Host $host;
+                        proxy_set_header X-Real-IP $remote_addr;
+                        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                        proxy_set_header X-Forwarded-Proto $scheme;
+                    }
+                }
+            }
+            EOL
+
+            # Install Certbot and request SSL certificate
+            amazon-linux-extras install epel -y
+            yum install -y certbot python3-certbot-nginx
+
+            # Request the SSL certificate
+            certbot --nginx -d snapstronaut.tech --non-interactive --agree-tos -m shoreibah.n@northeastern.edu
+
+            # Set up a cron job to auto-renew the certificate
+            echo "0 0 * * * /usr/bin/certbot renew --quiet" | crontab -
+
+            # Restart Nginx to apply the configuration
+            systemctl restart nginx
+EOF
 }
+
 
 # Security group for the EC2 instance
 resource "aws_security_group" "api_sg" {
-  name        = "api-security-group"
+  name = "api-security-group"
 
   ingress {
     from_port   = 80
@@ -137,6 +244,15 @@ resource "aws_security_group" "api_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # Allow SSH access from anywhere (0.0.0.0/0)
+  # For better security, replace "0.0.0.0/0" with your specific IP range
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   egress {
     from_port   = 0
     to_port     = 0
@@ -144,7 +260,6 @@ resource "aws_security_group" "api_sg" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
-
 
 # Create an RDS instance for the relational database
 resource "aws_db_instance" "astronaut_db" {
