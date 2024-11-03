@@ -135,30 +135,34 @@ resource "aws_instance" "api_server" {
             # Update the server
             yum update -y
 
-            # Install Git
+            # Install Git and other prerequisites
             yum install -y git
 
             # Clone the repository
+            mkdir -p /var/www
             cd /var/www
             git clone https://github.com/Alexcchip/Boston-Hacks.git
+            cd Boston-Hacks
             git checkout prodbranch
             git pull
-            
 
-            # Navigate to backend directory and install dependencies
+            # Install Python 3.8 and set up virtual environment
+            amazon-linux-extras enable python3.8
+            yum install -y python3.8 python3.8-venv python3-pip
+            python3.8 -m venv /var/www/Boston-Hacks/backend/venv
+
+            # Activate virtual environment and install backend dependencies
+            source /var/www/Boston-Hacks/backend/venv/bin/activate
             cd /var/www/Boston-Hacks/backend
-            yum install -y python3 python3-pip
-            pip3 install --upgrade pip
-            pip3 install -r requirements.txt
+            pip install --upgrade pip
+            pip install -r requirements.txt
 
-            # Start Gunicorn for Flask app
-            gunicorn -w 4 -b 127.0.0.1:5000 app:app --daemon
+            # Run Gunicorn for the Flask app
+            /var/www/Boston-Hacks/backend/venv/bin/gunicorn -w 4 -b 127.0.0.1:5000 app:app --daemon
 
-            # Install Node.js and npm for the frontend
+            # Install Node.js, npm, and build frontend
             curl -sL https://rpm.nodesource.com/setup_16.x | bash -
             yum install -y nodejs
-
-            # Navigate to frontend directory, install dependencies, and build
             cd /var/www/Boston-Hacks/frontend
             npm install
             npm run build
@@ -178,16 +182,16 @@ resource "aws_instance" "api_server" {
                 include /etc/nginx/mime.types;
                 server {
                     listen 80;
-                    server_name snapstronaut.tech;  
-                    
+                    server_name snapstronaut.tech;
+
                     # Redirect HTTP to HTTPS
                     return 301 https://$host$request_uri;
                 }
 
                 server {
                     listen 443 ssl;
-                    server_name snapstronaut.tech;  
-                    
+                    server_name snapstronaut.tech;
+
                     # SSL certificate configuration (managed by Certbot)
                     ssl_certificate /etc/letsencrypt/live/snapstronaut.tech/fullchain.pem;
                     ssl_certificate_key /etc/letsencrypt/live/snapstronaut.tech/privkey.pem;
@@ -212,17 +216,19 @@ resource "aws_instance" "api_server" {
 
             # Install Certbot and request SSL certificate
             amazon-linux-extras install epel -y
-            yum install -y certbot python3-certbot-nginx
+            yum install -y certbot
+            /usr/local/bin/pip3 install certbot-nginx
 
-            # Request the SSL certificate
+            # Request SSL certificate
             certbot --nginx -d snapstronaut.tech --non-interactive --agree-tos -m shoreibah.n@northeastern.edu
 
-            # Set up a cron job to auto-renew the certificate
+            # Set up a cron job for auto-renewing the certificate
             echo "0 0 * * * /usr/bin/certbot renew --quiet" | crontab -
 
             # Restart Nginx to apply the configuration
             systemctl restart nginx
 EOF
+
 }
 
 
