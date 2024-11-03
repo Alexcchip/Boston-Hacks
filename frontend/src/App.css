@@ -32,7 +32,146 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes shine {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes modal-appear {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0) translateX(0);
+  }
+
+  50% {
+    transform: translateY(-20px) translateX(10px);
+  }
+}
+
+@keyframes slideRight {
+  from {
+    transform: translateX(-100%);
+  }
+
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
+}
+
+.animate-shine {
+  animation: shine 1.5s linear infinite;
+}
+
+.animate-modal-appear {
+  animation: modal-appear 0.2s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.2s ease-out;
+}
+
+.animate-float {
+  animation: float 10s ease-in-out infinite;
+}
+
+/* Scrollbar Styles */
+.scrollbar-thin {
+  scrollbar-width: thin;
+}
+
+.scrollbar-thumb-slate-600 {
+  scrollbar-color: #475569 transparent;
+}
+
+.scrollbar-track-slate-800 {
+  scrollbar-track-color: #1e293b;
+}
+
+/* Custom scrollbar for Webkit browsers */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: #1e293b;
+  border-radius: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #475569;
+  border-radius: 4px;
+}
+
+/* Progress bar animations */
+.progress-bar {
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(255, 255, 255, 0.1),
+      transparent);
+  transform: translateX(-100%);
+  animation: shine 2s infinite;
+}
+
+/* For Firefox backdrop-filter support */
+@supports (-moz-appearance:none) {
+  .backdrop-blur-lg {
+    background-color: rgba(15, 23, 42, 0.9);
   }
 }
