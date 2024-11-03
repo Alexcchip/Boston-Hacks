@@ -32,45 +32,42 @@ const RocketLoader = () => (
   </div>
 );
 
-  const TaskCard = ({ task, onClick, isCompleted, username }) => (
-    <div
-      onClick={onClick}
-      className={`p-4 transition-all duration-300 border rounded-lg cursor-pointer 
-        bg-slate-700/50 border-slate-600 hover:border-blue-400 hover:transform hover:scale-105
-        ${isCompleted ? 'hover:border-green-400' : 'hover:border-blue-400'}
-        group relative overflow-hidden`}
-    >
-      <div className="absolute inset-0 transition-transform duration-1000 -translate-x-full bg-gradient-to-r from-transparent via-slate-400/5 to-transparent animate-shine group-hover:translate-x-full" />
-      <div className="flex items-start justify-between">
-        <div>
-          <h3 className="font-bold text-white">{task.task_name}</h3>
-          {username && <p className="text-sm text-slate-400">Posted by: {username}</p>}
-        </div>
-        {isCompleted ? (
-          <Star className="w-5 h-5 text-yellow-400" />
-        ) : (
-          <Target className="w-5 h-5 text-blue-400" />
-        )}
-      </div>
+const TaskCard = ({ task, onClick, isCompleted }) => (
+  <div
+    onClick={onClick}
+    className={`p-4 transition-all duration-300 border rounded-lg cursor-pointer 
+      bg-slate-700/50 border-slate-600 hover:border-blue-400 hover:transform hover:scale-105
+      ${isCompleted ? 'hover:border-green-400' : 'hover:border-blue-400'}
+      group relative overflow-hidden`}
+  >
+    <div className="absolute inset-0 transition-transform duration-1000 -translate-x-full bg-gradient-to-r from-transparent via-slate-400/5 to-transparent animate-shine group-hover:translate-x-full" />
+    <div className="flex items-start justify-between">
+      <h3 className="font-bold text-white">{task.task_name}</h3>
       {isCompleted ? (
-        <>
-          <p className="mt-2 text-sm text-slate-300">
-            <Clock className="inline w-4 h-4 mr-1" />
-            {new Date(task.completed_at).toLocaleString()}
-          </p>
-          {task.photo_url && (
-            <img 
-              src={task.photo_url} 
-              alt="Mission complete" 
-              className="object-cover w-full mt-2 transition-transform duration-300 border rounded-lg border-slate-600 hover:scale-105"
-            />
-          )}
-        </>
+        <Star className="w-5 h-5 text-yellow-400" />
       ) : (
-        <p className="mt-2 text-blue-400">Mission Points: {task.points}</p>
+        <Target className="w-5 h-5 text-blue-400" />
       )}
     </div>
-  );
+    {isCompleted ? (
+      <>
+        <p className="mt-2 text-sm text-slate-300">
+          <Clock className="inline w-4 h-4 mr-1" />
+          {new Date(task.completed_at).toLocaleString()}
+        </p>
+        {task.photo_url && (
+          <img 
+            src={task.photo_url} 
+            alt="Mission complete" 
+            className="object-cover w-full mt-2 transition-transform duration-300 border rounded-lg border-slate-600 hover:scale-105"
+          />
+        )}
+      </>
+    ) : (
+      <p className="mt-2 text-blue-400">Mission Points: {task.points}</p>
+    )}
+  </div>
+);
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -209,6 +206,39 @@ export default function Dashboard() {
   return (
     <div className="relative min-h-screen bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900">
       <StarField />
+      
+      {/* Rest of the component remains the same... */}
+      <nav className="sticky top-0 z-10 border-b bg-slate-800/80 backdrop-blur-lg border-slate-700">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <Rocket className="w-8 h-8 text-blue-400 animate-pulse" />
+              <h1 className="text-xl font-bold text-white">Mission Control</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Link 
+                to="/leaderboard" 
+                className="text-indigo-300 transition-colors duration-200 hover:text-indigo-200"
+              >
+                Leaderboard
+              </Link>
+              <Link 
+                to="/track" 
+                className="text-indigo-300 transition-colors duration-200 hover:text-indigo-200"
+              >
+                Planetary Tracker
+              </Link>
+              <button 
+                onClick={handleLogout} 
+                className="flex items-center px-4 py-2 space-x-2 text-white transition-all duration-200 bg-red-600 rounded-lg hover:bg-red-700 hover:scale-105"
+              >
+                <LogOut className="w-4 h-4" />
+                <span>Abort Mission</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
 
       <main className="relative px-4 py-8 mx-auto z-1 max-w-7xl sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
@@ -223,7 +253,7 @@ export default function Dashboard() {
             <div className="p-6 space-y-4 h-[400px] overflow-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
               {recentTasks.length > 0 ? (
                 recentTasks.map(task => (
-                  <TaskCard key={task.user_task_id} task={task} isCompleted={true} username={task.username} />
+                  <TaskCard key={task.user_task_id} task={task} isCompleted={true} />
                 ))
               ) : (
                 <p className="text-slate-400">No missions completed yet, astronaut!</p>
@@ -247,7 +277,6 @@ export default function Dashboard() {
                     task={task} 
                     onClick={() => openModal(task)} 
                     isCompleted={false}
-                    username={task.username} // Add username here
                   />
                 ))
               ) : (
@@ -258,7 +287,60 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Modal and other components remain the same */}
+      {/* Modal */}
+      {isModalOpen && selectedTask && (
+        <div 
+          className="fixed inset-0 z-20 flex items-center justify-center bg-black/60 backdrop-blur-sm"
+          onClick={(e) => e.target === e.currentTarget && closeModal()}
+        >
+          <div className="bg-slate-800 border border-slate-700 rounded-xl w-[400px] overflow-hidden animate-modal-appear">
+            <div className="p-6 border-b border-slate-700">
+              <h3 className="text-xl font-bold text-white">{selectedTask.task_name}</h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-slate-300">{selectedTask.description}</p>
+              <div className="space-y-4">
+                <div className="relative">
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="flex items-center justify-center p-4 space-x-2 transition-all duration-300 border-2 border-dashed rounded-lg cursor-pointer border-slate-600 hover:border-blue-400 hover:scale-105 text-slate-300"
+                  >
+                    <Upload className="w-5 h-5" />
+                    <span>Upload mission evidence</span>
+                  </label>
+                </div>
+                {file && (
+                  <p className="text-sm text-slate-400 animate-fade-in">Selected: {file.name}</p>
+                )}
+                {message && (
+                  <p className="text-sm text-blue-400 animate-fade-in">{message}</p>
+                )}
+                <div className="flex space-x-3">
+                  <button 
+                    onClick={handleSubmitTaskCompletion}
+                    className="flex-1 px-4 py-2 text-white transition-all duration-200 bg-blue-600 rounded-lg hover:bg-blue-700 hover:scale-105"
+                  >
+                    Complete Mission
+                  </button>
+                  <button 
+                    onClick={closeModal}
+                    className="flex-1 px-4 py-2 text-white transition-all duration-200 bg-red-600 rounded-lg hover:bg-red-700 hover:scale-105"
+                  >
+                    Abort
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
