@@ -29,13 +29,23 @@ This project is a mental health application designed for astronauts. It provides
 Create a `.env` file in the `backend` directory with the following variables:
 
 DB_USER=<your_db_user>
+
 DB_PASSWORD=<your_db_password>
+
 DB_HOST=<your_db_host>
+
 DB_PORT=<your_db_port>
+
 DB_NAME=<your_db_name>
+
 AWS_REGION=<your_aws_region>
-AWS_ACCESS_KEY_ID=<your_aws_access_key_id> AWS_SECRET_ACCESS_KEY=<your_aws_secret_access_key>
+
+AWS_ACCESS_KEY_ID=<your_aws_access_key_id>
+
+AWS_SECRET_ACCESS_KEY=<your_aws_secret_access_key>
+
 S3_BUCKET_NAME=<your_s3_bucket_name>
+
 JWT_SECRET_KEY=<your_jwt_secret_key>
 
 You can look at the template in the `.env.local` file
