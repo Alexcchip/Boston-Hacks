@@ -318,7 +318,7 @@ def complete_task(task_id):
 @jwt_required()
 def get_recent_user_tasks(n):
     """
-    Get the last n UserTasks sorted by the most recent completion date.
+    Get the last n UserTasks with additional data like task name, points, and username.
     ---
     tags:
       - UserTasks
@@ -330,7 +330,7 @@ def get_recent_user_tasks(n):
         description: Number of most recent UserTasks to retrieve
     responses:
       200:
-        description: List of most recent UserTasks
+        description: List of most recent UserTasks with detailed information
         content:
           application/json:
             schema:
@@ -347,6 +347,15 @@ def get_recent_user_tasks(n):
                   task_id:
                     type: integer
                     description: ID of the completed task
+                  task_name:
+                    type: string
+                    description: Name of the task
+                  points:
+                    type: integer
+                    description: Points awarded for completing the task
+                  username:
+                    type: string
+                    description: Username of the user who completed the task
                   photo_url:
                     type: string
                     description: URL of the completion photo
@@ -357,10 +366,31 @@ def get_recent_user_tasks(n):
         description: Server error
     """
     try:
-        # Retrieve the last n UserTasks ordered by most recent completion
-        recent_tasks = UserTasks.query.order_by(UserTasks.completed_at.desc()).limit(n).all()
+        # Query for the recent tasks, joining User and Task details
+        recent_tasks = (
+            db.session.query(UserTasks, User.username, Tasks.task_name, Tasks.points)
+            .join(User, UserTasks.user_id == User.user_id)
+            .join(Tasks, UserTasks.task_id == Tasks.task_id)
+            .order_by(UserTasks.completed_at.desc())
+            .limit(n)
+            .all()
+        )
         
-        # Return the tasks in JSON format
-        return jsonify([task.to_dict() for task in recent_tasks]), 200
+        # Format response with the required data
+        response = [
+            {
+                "user_task_id": task.user_task_id,
+                "user_id": task.user_id,
+                "task_id": task.task_id,
+                "task_name": task_name,
+                "points": points,
+                "username": username,
+                "photo_url": task.photo_url,
+                "completed_at": task.completed_at.strftime("%Y-%m-%d %H:%M:%S")
+            }
+            for task, username, task_name, points in recent_tasks
+        ]
+        
+        return jsonify(response), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

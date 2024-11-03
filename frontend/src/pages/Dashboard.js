@@ -4,7 +4,7 @@ import { getToken, logout } from '../utils/auth';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const [userData, setUserData] = useState({ email: '', user_since: ''});
+  const [userData, setUserData] = useState({ email: '', user_since: '' });
   const [recentTasks, setRecentTasks] = useState([]);
   const [notCompletedTasks, setNotCompletedTasks] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -106,7 +106,7 @@ export default function Dashboard() {
       });
       const { url, file_key } = await presignedResponse.json();
 
-      console.log("got presigned url")
+      console.log("got presigned url");
 
       // Step 2: Upload the file to S3
       await fetch(url, {
@@ -151,13 +151,17 @@ export default function Dashboard() {
   
       <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
         <section style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h2>Recently Completed Tasks</h2>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '16px' }}>Recently Completed Tasks</h2>
           {recentTasks.length > 0 ? (
             recentTasks.map(task => (
-              <div key={task.user_task_id} style={{ padding: '8px 0', borderBottom: '1px solid #E5E7EB' }}>
-                <p style={{ fontWeight: 'bold' }}>{task.task_name}</p>
-                <p>Completed at: {new Date(task.completed_at).toLocaleString()}</p>
-                <img src={task.photo_url} alt="Completed task" style={{ maxWidth: '100%', marginTop: '8px' }} />
+              <div key={task.user_task_id} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #E5E7EB' }}>
+                <img src={task.photo_url} alt="Completed task" style={{ width: '80px', height: '80px', borderRadius: '8px', marginRight: '16px', objectFit: 'cover' }} />
+                <div style={{ flex: 1 }}>
+                  <p style={{ fontWeight: 'bold', fontSize: '1rem' }}>{task.task_name}</p>
+                  <p style={{ color: '#6B7280' }}>Completed by: {task.username}</p>
+                  <p>Points: {task.points}</p>
+                  <p style={{ fontSize: '0.875rem', color: '#6B7280' }}>Completed at: {new Date(task.completed_at).toLocaleString()}</p>
+                </div>
               </div>
             ))
           ) : (
@@ -165,8 +169,9 @@ export default function Dashboard() {
           )}
         </section>
   
-        <section style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', overflow: 'auto', height:'450px', width:'500px'  }}>
-          <h2>Tasks to Complete</h2>
+
+        <section style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+          <h2 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '16px' }}>Tasks to Complete</h2>
           {notCompletedTasks.length > 0 ? (
             notCompletedTasks.map(task => (
               <div key={task.task_id} onClick={() => openModal(task)} style={{ padding: '8px 0', borderBottom: '1px solid #E5E7EB', cursor: 'pointer' }}>
