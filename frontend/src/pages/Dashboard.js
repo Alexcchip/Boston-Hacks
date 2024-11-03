@@ -185,23 +185,86 @@ export default function Dashboard() {
       </main>
 
       {isModalOpen && selectedTask && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', width: '400px' }}>
-            <h3>{selectedTask.task_name}</h3>
-            <p>{selectedTask.description}</p>
-            <input type="file" onChange={handleFileChange} accept="image/*" />
-            <button onClick={handleSubmitTaskCompletion} style={{ marginTop: '16px', padding: '8px 16px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-              Submit
-            </button>
-            <button onClick={closeModal} style={{ marginTop: '8px', padding: '8px 16px', backgroundColor: '#DC2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-              Cancel
-            </button>
-            {message && <p>{message}</p>}
-          </div>
-        </div>
+  <div
+    style={{
+      position: 'fixed',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      zIndex: 1000,
+    }}
+  >
+    <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', width: '400px', boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)' }}>
+      <h3 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '8px', color: '#111827' }}>
+        {selectedTask.task_name}
+      </h3>
+      <p style={{ color: '#6B7280', marginBottom: '16px' }}>{selectedTask.description}</p>
+
+      <label htmlFor="file-upload" style={{ display: 'block', marginBottom: '8px', color: '#4B5563' }}>
+        Choose an image:
+      </label>
+      <input
+        type="file"
+        id="file-upload"
+        onChange={handleFileChange}
+        accept="image/*"
+        style={{
+          display: 'block',
+          width: '100%',
+          padding: '8px',
+          border: '1px solid #D1D5DB',
+          borderRadius: '4px',
+          marginBottom: '16px',
+          cursor: 'pointer',
+        }}
+      />
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px' }}>
+        <button
+          onClick={handleSubmitTaskCompletion}
+          style={{
+            flex: 1,
+            padding: '10px 16px',
+            backgroundColor: '#4CAF50',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+        >
+          Submit
+        </button>
+        <button
+          onClick={closeModal}
+          style={{
+            flex: 1,
+            padding: '10px 16px',
+            backgroundColor: '#DC2626',
+            color: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer',
+            fontWeight: 'bold',
+          }}
+        >
+          Cancel
+        </button>
+      </div>
+
+      {message && (
+        <p style={{ marginTop: '12px', color: message.includes('success') ? '#16A34A' : '#DC2626' }}>
+          {message}
+        </p>
       )}
+    </div>
+  </div>
+)}
     </div>
   );
 }
