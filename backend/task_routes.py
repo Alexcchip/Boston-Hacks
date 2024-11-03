@@ -5,6 +5,19 @@ import os
 import uuid
 from datetime import datetime
 from models import db, User, Tasks, UserTasks
+from functools import wraps
+from flask_jwt_extended import verify_jwt_in_request
+
+
+def jwt_optional(fn):
+    @wraps(fn)
+    def wrapper(*args, **kwargs):
+        if request.method == 'OPTIONS':
+            return fn(*args, **kwargs)
+        else:
+            verify_jwt_in_request()
+            return fn(*args, **kwargs)
+    return wrapper
 
 # Initialize S3 client
 s3_client = boto3.client("s3", region_name=os.getenv("AWS_REGION"))
@@ -64,6 +77,7 @@ def get_tasks_not_completed_by_user():
         # Return tasks not completed
         return jsonify([task.to_dict() for task in tasks_not_completed]), 200
     except Exception as e:
+        print(e)
         return jsonify({"error": str(e)}), 500
 
 
@@ -105,7 +119,12 @@ def get_all_asks():
         description: Error retrieving tasks
     """
     tasks = Tasks.query.all()
-    return jsonify([task.to_dict() for task in tasks]), 200
+    try:
+        return jsonify([task.to_dict() for task in tasks]), 200
+    except Exception as e:
+        print(e)
+        return jsonify({"error": str(e)}), 500
+
 
 
 
@@ -285,4 +304,55 @@ def complete_task(task_id):
         return jsonify({"message": "Task marked as completed", "photo_url": photo_url}), 201
     except Exception as e:
         db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@task_routes.route("/api/user-tasks/recent/<int:n>", methods=["GET"])
+@jwt_required()
+def get_recent_user_tasks(n):
+    """
+    Get the last n UserTasks sorted by the most recent completion date.
+    ---
+    tags:
+      - UserTasks
+    parameters:
+      - name: n
+        in: path
+        required: true
+        type: integer
+        description: Number of most recent UserTasks to retrieve
+    responses:
+      200:
+        description: List of most recent UserTasks
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  user_task_id:
+                    type: integer
+                    description: ID of the user task
+                  user_id:
+                    type: integer
+                    description: ID of the user who completed the task
+                  task_id:
+                    type: integer
+                    description: ID of the completed task
+                  photo_url:
+                    type: string
+                    description: URL of the completion photo
+                  completed_at:
+                    type: string
+                    description: Completion timestamp
+      500:
+        description: Server error
+    """
+    try:
+        # Retrieve the last n UserTasks ordered by most recent completion
+        recent_tasks = UserTasks.query.order_by(UserTasks.completed_at.desc()).limit(n).all()
+        
+        # Return the tasks in JSON format
+        return jsonify([task.to_dict() for task in recent_tasks]), 200
+    except Exception as e:
         return jsonify({"error": str(e)}), 500

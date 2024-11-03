@@ -23,7 +23,7 @@ def create_app():
     app = Flask(__name__)
     
     # Configure CORS
-    CORS(app)
+    CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers=["Content-Type", "Authorization"])
 
     
     # Database Configuration for PostgreSQL
@@ -149,6 +149,8 @@ def register():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+
     
 @app.route("/api/login", methods=["POST"])
 def login():

@@ -63,6 +63,7 @@ try:
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     );
     """)
+    
 
     # Create Tasks table
     cursor.execute("""
@@ -89,6 +90,17 @@ try:
         ('Meditate', 'Spend 10 minutes meditating to maintain mental well-being.', 5),
         ('Listen to Music', 'Take a break and listen to some of your favorite tunes.', 5),
         ('Video Call with Friends', 'Use the video link to catch up with friends for 15 minutes.', 10);
+    """)
+
+    # Create UserTasks table to track task completion by users
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS UserTasks (
+        user_task_id SERIAL PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES Users(user_id) ON DELETE CASCADE,
+        task_id INT NOT NULL REFERENCES Tasks(task_id) ON DELETE CASCADE,
+        photo_url VARCHAR(255),
+        completed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    );
     """)
 
     # Commit changes
