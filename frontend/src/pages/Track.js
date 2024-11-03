@@ -31,19 +31,6 @@ function MapEvents({ onMapClick }) {
   return null;
 }
 
-// New component to automatically center on ISS
-function AutoCenter({ position }) {
-  const map = useMap();
-  
-  useEffect(() => {
-    if (position) {
-      map.setView([position.latitude, position.longitude], map.getZoom());
-    }
-  }, [position, map]);
-
-  return null;
-}
-
 export default function Track() {
   const [issPosition, setIssPosition] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -172,16 +159,18 @@ export default function Track() {
               <div className="h-[500px] border rounded-lg border-[#2a3854] overflow-hidden">
                 <MapContainer
                   center={[0, 0]}
-                  zoom={3}
+                  zoom={2}
                   style={{ height: '100%', width: '100%' }}
                   className="z-0"
+                  minZoom={2}
+                  maxBounds={[[-90, -180], [90, 180]]}
+                  maxBoundsViscosity={1.0}
                 >
                   <TileLayer
                     attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
                   <MapEvents onMapClick={handleMapClick} />
-                  {issPosition && <AutoCenter position={issPosition} />}
                   
                   {issPosition && (
                     <Marker
@@ -224,7 +213,7 @@ export default function Track() {
                 </MapContainer>
               </div>
               <div className="mt-4 text-sm text-gray-400">
-                Click anywhere on the map to see location details. Map automatically centers on ISS location.
+                Click anywhere on the map to see location details. The ISS marker updates automatically while the map stays fixed.
               </div>
             </div>
           </div>
