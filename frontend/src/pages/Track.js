@@ -12,7 +12,7 @@ L.Icon.Default.mergeOptions({
 });
 
 const issIcon = new L.Icon({
-  iconUrl: 'https://cdn.icon-icons.com/icons2/1389/PNG/512/internationalspacestation_96146.png',
+  iconUrl: './iss.png',
   iconSize: [32, 32],
   iconAnchor: [16, 16],
   popupAnchor: [0, -16],
@@ -305,6 +305,30 @@ export default function Track() {
               </span>
             </div>
           </div>
+              <div className="overflow-hidden border rounded-xl bg-[#1a2337]/50 backdrop-blur-lg border-[#2a3854]">
+      <div className="p-6 border-b border-[#2a3854]">
+        <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
+          <span>🔭</span>
+          <span>When will you be flying over your family?</span>
+        </h2>
+      </div>
+      <div className="p-6">
+        <div className="flex justify-center">
+          <div className="inline-block overflow-hidden border rounded-lg border-[#2a3854] bg-[#1a2337]/50">
+            <iframe
+              src="https://spotthestation.nasa.gov/widget/widget2.cfm?theme=2"
+              className="w-[310px] h-[450px]"
+              title="NASA Spot The Station Widget"
+            />
+          </div>
+        </div>
+        <div className="mt-4 text-sm text-center text-gray-400">
+          View when you will be flying over your loved ones by entering a desired location.
+        </div>
+      </div>
+    </div>
+
+
         </div>
       </main>
     </div>
