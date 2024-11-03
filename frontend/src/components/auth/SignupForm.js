@@ -42,15 +42,18 @@ export default function SignupForm() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div 
+      className="min-h-screen flex items-center justify-center"
+      style={{
+        backgroundColor: '#0B0E1D',
+        backgroundImage: 'radial-gradient(circle, rgba(37, 78, 255, 0.1), transparent), url("/space.gif")',
+        backgroundPosition: 'center',
+        color: '#E0E7FF',
+      }}
+    >
+      <div className="max-w-md w-full space-y-8 bg-slate-800 p-8 rounded-lg">
         <div>
-          <h2 style={{ 
-            textAlign: 'center', 
-            fontSize: '1.875rem',
-            fontWeight: 'bold',
-            marginBottom: '24px'
-          }}>
+          <h2 className="text-center text-3xl font-extrabold" style={{ color: 'white' }}>
             Create your account
           </h2>
         </div>
@@ -74,10 +77,12 @@ export default function SignupForm() {
               required
               style={{
                 width: '100%',
-                padding: '8px 12px',
+                padding: '12px 16px',
                 marginBottom: '8px',
-                border: '1px solid #D1D5DB',
+                border: '1px solid #A3BFFA',
                 borderRadius: '4px',
+                backgroundColor: '#1F2937',
+                color: '#A3BFFA',
               }}
               placeholder="Username"
               value={formData.username}
@@ -91,10 +96,12 @@ export default function SignupForm() {
               required
               style={{
                 width: '100%',
-                padding: '8px 12px',
+                padding: '12px 16px',
                 marginBottom: '8px',
-                border: '1px solid #D1D5DB',
+                border: '1px solid #A3BFFA',
                 borderRadius: '4px',
+                backgroundColor: '#1F2937',
+                color: '#A3BFFA',
               }}
               placeholder="Email address"
               value={formData.email}
@@ -108,10 +115,12 @@ export default function SignupForm() {
               required
               style={{
                 width: '100%',
-                padding: '8px 12px',
+                padding: '12px 16px',
                 marginBottom: '8px',
-                border: '1px solid #D1D5DB',
+                border: '1px solid #A3BFFA',
                 borderRadius: '4px',
+                backgroundColor: '#1F2937',
+                color: '#A3BFFA',
               }}
               placeholder="Password"
               value={formData.password}
@@ -125,10 +134,12 @@ export default function SignupForm() {
               required
               style={{
                 width: '100%',
-                padding: '8px 12px',
+                padding: '12px 16px',
                 marginBottom: '8px',
-                border: '1px solid #D1D5DB',
+                border: '1px solid #A3BFFA',
                 borderRadius: '4px',
+                backgroundColor: '#1F2937',
+                color: '#A3BFFA',
               }}
               placeholder="Team Name"
               value={formData.team_name}
@@ -140,21 +151,24 @@ export default function SignupForm() {
               type="submit"
               style={{
                 width: '100%',
-                padding: '8px 16px',
-                backgroundColor: '#2563EB',
-                color: 'white',
+                padding: '12px 16px',
+                backgroundColor: 'white',
+                color: 'black',
                 border: 'none',
                 borderRadius: '4px',
                 cursor: 'pointer',
-                marginBottom: '16px'
+                fontWeight: 'bold',
+                transition: 'background-color 0.3s',
               }}
+              onMouseOver={(e) => e.target.style.backgroundColor = 'grey'}
+              onMouseOut={(e) => e.target.style.backgroundColor = 'white'}
             >
               Sign up
             </button>
           </div>
         </form>
         <div style={{ textAlign: 'center' }}>
-          <Link to="/login" style={{ color: '#2563EB', textDecoration: 'none' }}>
+          <Link to="/login" style={{ color: '#A3BFFA', textDecoration: 'none' }}>
             Already have an account? Sign in
           </Link>
         </div>
@@ -162,16 +176,3 @@ export default function SignupForm() {
     </div>
   );
 }
-
-// src/utils/auth.js
-export const isAuthenticated = () => {
-  return !!localStorage.getItem('token');
-};
-
-export const getToken = () => {
-  return localStorage.getItem('token');
-};
-
-export const logout = () => {
-  localStorage.removeItem('token');
-};
