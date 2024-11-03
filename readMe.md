@@ -14,6 +14,7 @@ This project is a mental health application designed for astronauts. It provides
 - **Frontend**: React, Tailwind CSS, Leaflet for maps.
 - **Database**: PostgreSQL
 - **Cloud Storage**: AWS S3 for storing images.
+- **Infrastructure as Code**: Terraform for managing cloud resources.
 
 ## Running the Project
 
@@ -23,6 +24,7 @@ This project is a mental health application designed for astronauts. It provides
 - Python 3.x
 - PostgreSQL
 - AWS account for S3
+- Terraform
 
 ### Environment Variables
 
@@ -94,6 +96,26 @@ You can look at the template in the `.env.local` file
 
    ```sh
    npm start
+   ```
+
+### Terraform Setup
+
+1. Navigate to the `infrastructure` directory:
+
+   ```sh
+   cd infrastructure
+   ```
+
+2. Initialize Terraform:
+
+   ```sh
+   terraform init
+   ```
+
+3. Apply the Terraform configuration to set up the necessary cloud resources:
+
+   ```sh
+   terraform apply
    ```
 
 ## API Endpoints
