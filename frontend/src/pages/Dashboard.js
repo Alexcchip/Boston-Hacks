@@ -106,12 +106,15 @@ export default function Dashboard() {
       });
       const { url, file_key } = await presignedResponse.json();
 
+      console.log("got presigned url")
+
       // Step 2: Upload the file to S3
       await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': file.type },
         body: file
       });
+      console.log("File uploaded to S3 successfully");
 
       // Step 3: Mark task as completed
       await fetch(`http://localhost:5000/api/tasks/${selectedTask.task_id}/complete`, {
