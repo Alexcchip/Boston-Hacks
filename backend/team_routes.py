@@ -2,11 +2,13 @@
 from flask import Blueprint, jsonify
 from sqlalchemy import func
 from models import db, Teams, User, UserTasks, Tasks
+from flask_jwt_extended import jwt_required
 
 # Create a Blueprint for team routes
 team_routes = Blueprint("team_routes", __name__)
 
 @team_routes.route("/api/teams/points", methods=["GET"])
+@jwt_required()
 def get_teams_with_points():
     """
     Get all teams with their total points.
