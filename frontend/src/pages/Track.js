@@ -11,7 +11,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom ISS icon
 const issIcon = new L.Icon({
   iconUrl: 'https://cdn.icon-icons.com/icons2/1389/PNG/512/internationalspacestation_96146.png',
   iconSize: [32, 32],
@@ -19,7 +18,6 @@ const issIcon = new L.Icon({
   popupAnchor: [0, -16],
 });
 
-// Component to handle map click events
 function MapEvents({ onMapClick }) {
   const map = useMap();
   
@@ -33,14 +31,27 @@ function MapEvents({ onMapClick }) {
   return null;
 }
 
+// New component to automatically center on ISS
+function AutoCenter({ position }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    if (position) {
+      map.setView([position.latitude, position.longitude], map.getZoom());
+    }
+  }, [position, map]);
+
+  return null;
+}
+
 export default function Track() {
   const [issPosition, setIssPosition] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [lastUpdate, setLastUpdate] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
-  const [passTimes, setPassTimes] = useState([]);
-  const [loadingPasses, setLoadingPasses] = useState(false);
+  const [locationInfo, setLocationInfo] = useState(null);
+  const [loadingLocation, setLoadingLocation] = useState(false);
 
   const fetchISSPosition = async () => {
     try {
@@ -48,11 +59,15 @@ export default function Track() {
       if (!response.ok) throw new Error('Failed to fetch ISS position');
       
       const data = await response.json();
-      setIssPosition({
+      const newPosition = {
         latitude: parseFloat(data.iss_position.latitude),
         longitude: parseFloat(data.iss_position.longitude)
-      });
+      };
+      setIssPosition(newPosition);
       setLastUpdate(new Date(data.timestamp * 1000));
+      
+      // Fetch location name for ISS position
+      fetchLocationInfo(newPosition.latitude, newPosition.longitude, true);
       setError('');
     } catch (err) {
       setError('Failed to fetch ISS position. Please try again later.');
@@ -61,22 +76,40 @@ export default function Track() {
     }
   };
 
-  const fetchPassTimes = async (lat, lng) => {
-    setLoadingPasses(true);
+  const fetchLocationInfo = async (lat, lng, isISS = false) => {
+    setLoadingLocation(true);
     try {
       const response = await fetch(
-        `http://api.open-notify.org/iss-pass.json?lat=${lat}&lon=${lng}`
+        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10`
       );
-      if (!response.ok) throw new Error('Failed to fetch pass times');
+      if (!response.ok) throw new Error('Failed to fetch location information');
       
       const data = await response.json();
-      setPassTimes(data.response);
-      setError('');
+      const locationData = {
+        city: data.address.city || data.address.town || data.address.county || 'Over Ocean',
+        state: data.address.state || data.address.region || '',
+        country: data.address.country || 'International Waters',
+        description: isISS ? 'ISS is currently over' : 'Selected location'
+      };
+      
+      if (!isISS) {
+        setLocationInfo(locationData);
+      } else {
+        setIssPosition(prev => ({
+          ...prev,
+          location: locationData
+        }));
+      }
     } catch (err) {
-      setError('Failed to fetch ISS pass times. Please try again later.');
-      setPassTimes([]);
+      if (!isISS) {
+        setLocationInfo({
+          city: 'Ocean or Remote Area',
+          country: 'International Waters',
+          description: 'Selected location'
+        });
+      }
     } finally {
-      setLoadingPasses(false);
+      setLoadingLocation(false);
     }
   };
 
@@ -87,6 +120,7 @@ export default function Track() {
   }, []);
 
   const formatCoordinate = (coord, type) => {
+    if (coord === undefined || coord === null) return 'N/A';
     const absolute = Math.abs(coord);
     const direction = type === 'lat' 
       ? (coord >= 0 ? 'N' : 'S')
@@ -97,14 +131,12 @@ export default function Track() {
   const handleMapClick = (e) => {
     const { lat, lng } = e.latlng;
     setSelectedLocation({ lat, lng });
-    fetchPassTimes(lat, lng);
+    fetchLocationInfo(lat, lng);
   };
 
-  if (!issPosition && loading) return (
+  if (loading) return (
     <div className="flex items-center justify-center min-h-screen bg-[#0f1729]">
-      <div className="text-blue-400 animate-pulse">
-        Loading ISS coordinates...
-      </div>
+      <div className="text-blue-400 animate-pulse">Loading ISS coordinates...</div>
     </div>
   );
 
@@ -129,7 +161,6 @@ export default function Track() {
             </div>
           )}
 
-          {/* World Map Card */}
           <div className="overflow-hidden border rounded-xl bg-[#1a2337]/50 backdrop-blur-lg border-[#2a3854]">
             <div className="p-6 border-b border-[#2a3854]">
               <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
@@ -141,7 +172,7 @@ export default function Track() {
               <div className="h-[500px] border rounded-lg border-[#2a3854] overflow-hidden">
                 <MapContainer
                   center={[0, 0]}
-                  zoom={2}
+                  zoom={3}
                   style={{ height: '100%', width: '100%' }}
                   className="z-0"
                 >
@@ -150,6 +181,7 @@ export default function Track() {
                     url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                   />
                   <MapEvents onMapClick={handleMapClick} />
+                  {issPosition && <AutoCenter position={issPosition} />}
                   
                   {issPosition && (
                     <Marker
@@ -159,6 +191,9 @@ export default function Track() {
                       <Popup>
                         <div className="text-center">
                           <strong>ISS Current Location</strong><br />
+                          <strong>{issPosition.location?.city}</strong><br />
+                          {issPosition.location?.state && `${issPosition.location.state}, `}
+                          {issPosition.location?.country}<br />
                           Lat: {formatCoordinate(issPosition.latitude, 'lat')}<br />
                           Lng: {formatCoordinate(issPosition.longitude, 'lng')}
                         </div>
@@ -171,6 +206,15 @@ export default function Track() {
                       <Popup>
                         <div className="text-center">
                           <strong>Selected Location</strong><br />
+                          {loadingLocation ? (
+                            <span>Loading location info...</span>
+                          ) : locationInfo && (
+                            <>
+                              <strong>{locationInfo.city}</strong><br />
+                              {locationInfo.state && `${locationInfo.state}, `}
+                              {locationInfo.country}
+                            </>
+                          )}<br />
                           Lat: {formatCoordinate(selectedLocation.lat, 'lat')}<br />
                           Lng: {formatCoordinate(selectedLocation.lng, 'lng')}
                         </div>
@@ -180,26 +224,33 @@ export default function Track() {
                 </MapContainer>
               </div>
               <div className="mt-4 text-sm text-gray-400">
-                Click anywhere on the map to see when the ISS will pass over that location
+                Click anywhere on the map to see location details. Map automatically centers on ISS location.
               </div>
             </div>
           </div>
 
-          {/* Position Cards */}
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {/* Current Position */}
             <div className="overflow-hidden border rounded-xl bg-[#1a2337]/50 backdrop-blur-lg border-[#2a3854]">
               <div className="p-6 border-b border-[#2a3854]">
                 <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
                   <span>🛰️</span>
-                  <span>Current Position</span>
-                  {loading && (
-                    <div className="w-2 h-2 ml-2 bg-blue-400 rounded-full animate-pulse"></div>
-                  )}
+                  <span>ISS Position</span>
                 </h2>
               </div>
               <div className="p-6">
                 <div className="grid gap-4">
+                  {issPosition?.location && (
+                    <div className="p-4 border rounded-lg bg-[#1a2337]/50 border-[#2a3854]">
+                      <div className="text-sm text-gray-400">Current Location</div>
+                      <div className="mt-1 text-xl font-bold text-white">
+                        {issPosition.location.city}
+                      </div>
+                      <div className="mt-1 text-sm text-gray-400">
+                        {issPosition.location.state && `${issPosition.location.state}, `}
+                        {issPosition.location.country}
+                      </div>
+                    </div>
+                  )}
                   <div className="p-4 border rounded-lg bg-[#1a2337]/50 border-[#2a3854]">
                     <div className="text-sm text-gray-400">Latitude</div>
                     <div className="mt-1 text-xl font-bold text-white">
@@ -216,43 +267,41 @@ export default function Track() {
               </div>
             </div>
 
-            {/* Pass Times */}
             {selectedLocation && (
               <div className="overflow-hidden border rounded-xl bg-[#1a2337]/50 backdrop-blur-lg border-[#2a3854]">
                 <div className="p-6 border-b border-[#2a3854]">
                   <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
-                    <span>⏱️</span>
-                    <span>Pass Times</span>
-                    {loadingPasses && (
-                      <div className="w-2 h-2 ml-2 bg-blue-400 rounded-full animate-pulse"></div>
-                    )}
+                    <span>📍</span>
+                    <span>Selected Location</span>
                   </h2>
                 </div>
                 <div className="p-6">
-                  <div className="mb-4 text-sm text-gray-400">
-                    Location: {formatCoordinate(selectedLocation.lat, 'lat')}, {formatCoordinate(selectedLocation.lng, 'lng')}
-                  </div>
-                  {passTimes.length > 0 ? (
-                    <div className="space-y-3">
-                      {passTimes.map((pass, index) => (
-                        <div 
-                          key={index}
-                          className="p-4 border rounded-lg bg-[#1a2337]/50 border-[#2a3854]"
-                        >
-                          <div className="text-white">
-                            {new Date(pass.risetime * 1000).toLocaleString()}
-                          </div>
-                          <div className="text-sm text-gray-400">
-                            Duration: {Math.round(pass.duration / 60)} minutes
-                          </div>
+                  <div className="grid gap-4">
+                    {locationInfo && (
+                      <div className="p-4 border rounded-lg bg-[#1a2337]/50 border-[#2a3854]">
+                        <div className="text-sm text-gray-400">Location</div>
+                        <div className="mt-1 text-xl font-bold text-white">
+                          {locationInfo.city}
                         </div>
-                      ))}
+                        <div className="mt-1 text-sm text-gray-400">
+                          {locationInfo.state && `${locationInfo.state}, `}
+                          {locationInfo.country}
+                        </div>
+                      </div>
+                    )}
+                    <div className="p-4 border rounded-lg bg-[#1a2337]/50 border-[#2a3854]">
+                      <div className="text-sm text-gray-400">Latitude</div>
+                      <div className="mt-1 text-xl font-bold text-white">
+                        {formatCoordinate(selectedLocation.lat, 'lat')}
+                      </div>
                     </div>
-                  ) : !loadingPasses && (
-                    <div className="text-gray-400">
-                      No upcoming passes found for this location
+                    <div className="p-4 border rounded-lg bg-[#1a2337]/50 border-[#2a3854]">
+                      <div className="text-sm text-gray-400">Longitude</div>
+                      <div className="mt-1 text-xl font-bold text-white">
+                        {formatCoordinate(selectedLocation.lng, 'lng')}
+                      </div>
                     </div>
-                  )}
+                  </div>
                 </div>
               </div>
             )}
