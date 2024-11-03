@@ -169,6 +169,7 @@ export default function Dashboard() {
           )}
         </section>
   
+
         <section style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
           <h2 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '16px' }}>Tasks to Complete</h2>
           {notCompletedTasks.length > 0 ? (
