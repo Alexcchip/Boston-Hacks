@@ -233,8 +233,12 @@ def test_db_connection(app):
         return False
     
 @app.route("/api/iss-now", methods=["GET"])
+@jwt_required()
 def get_iss_position():
-    response = requests.get("http://api.open-notify.org/iss-now.json")
+    try:
+        response = requests.get("http://api.open-notify.org/iss-now.json")
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": str(e)}), 500
     data = response.json()
     return jsonify(data)
 
