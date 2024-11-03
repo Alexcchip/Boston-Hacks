@@ -17,6 +17,7 @@ from flasgger import Swagger
 from task_routes import task_routes
 from team_routes import team_routes
 from user_routes import user_routes
+import requests
 
 # Load environment variables
 load_dotenv()
@@ -230,6 +231,12 @@ def test_db_connection(app):
     except Exception as e:
         print(f"Database connection failed: {str(e)}")
         return False
+    
+@app.route("/api/iss-now", methods=["GET"])
+def get_iss_position():
+    response = requests.get("http://api.open-notify.org/iss-now.json")
+    data = response.json()
+    return jsonify(data)
 
 if __name__ == "__main__":
 
@@ -239,3 +246,4 @@ if __name__ == "__main__":
     else:
         print("Exiting due to database connection failure.")
         sys.exit(1)
+

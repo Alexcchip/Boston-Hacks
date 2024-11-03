@@ -42,7 +42,7 @@ export default function Track() {
 
   const fetchISSPosition = async () => {
     try {
-      const response = await fetch('http://api.open-notify.org/iss-now.json');
+      const response = await fetch('https://snapstronaut.tech/api/iss-now');
       if (!response.ok) throw new Error('Failed to fetch ISS position');
       
       const data = await response.json();
