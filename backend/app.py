@@ -131,7 +131,7 @@ def register():
 
     try:
         # Hash the password
-        hashed_password = generate_password_hash(password)
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256')
         
         # Check if the team already exists
         team = Teams.query.filter_by(team_name=team_name).first()
