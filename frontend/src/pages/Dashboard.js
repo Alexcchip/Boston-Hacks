@@ -136,70 +136,144 @@ export default function Dashboard() {
     }
   };
 
-  if (!userData) return <div>Loading...</div>;
+  if (!userData) return (
+    <div className="flex items-center justify-center min-h-screen bg-slate-900">
+      <div className="text-blue-400 animate-pulse">
+        Loading mission control...
+      </div>
+    </div>
+  );
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F3F4F6', display: 'flex', flexDirection: 'column' }}>
-      <nav style={{ backgroundColor: 'white', padding: '16px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h1 style={{ fontSize: '1.25rem', fontWeight: 'bold' }}>Dashboard</h1>
-          <button onClick={handleLogout} style={{ padding: '8px 16px', backgroundColor: '#DC2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-            Logout
-          </button>
+    <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
+      <nav className="border-b bg-slate-800/50 backdrop-blur-lg border-slate-700">
+        <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center space-x-3">
+              <span className="text-2xl text-blue-400">🚀</span>
+              <h1 className="text-xl font-bold text-white">Mission Control</h1>
+            </div>
+            <button 
+              onClick={handleLogout} 
+              className="flex items-center px-4 py-2 space-x-2 text-white transition-colors duration-200 bg-red-600 rounded-lg hover:bg-red-700"
+            >
+              <span>🚪</span>
+              <span>Abort Mission</span>
+            </button>
+          </div>
         </div>
       </nav>
-  
-      <main style={{ maxWidth: '1280px', margin: '0 auto', padding: '24px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-        <section style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '16px' }}>Recently Completed Tasks</h2>
-          {recentTasks.length > 0 ? (
-            recentTasks.map(task => (
-              <div key={task.user_task_id} style={{ display: 'flex', alignItems: 'center', padding: '12px 0', borderBottom: '1px solid #E5E7EB' }}>
-                <img src={task.photo_url} alt="Completed task" style={{ width: '80px', height: '80px', borderRadius: '8px', marginRight: '16px', objectFit: 'cover' }} />
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontWeight: 'bold', fontSize: '1rem' }}>{task.task_name}</p>
-                  <p style={{ color: '#6B7280' }}>Completed by: {task.username}</p>
-                  <p>Points: {task.points}</p>
-                  <p style={{ fontSize: '0.875rem', color: '#6B7280' }}>Completed at: {new Date(task.completed_at).toLocaleString()}</p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No recent tasks completed.</p>
-          )}
-        </section>
-  
 
-        <section style={{ padding: '16px', backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-          <h2 style={{ fontSize: '1.125rem', fontWeight: 'bold', marginBottom: '16px' }}>Tasks to Complete</h2>
-          {notCompletedTasks.length > 0 ? (
-            notCompletedTasks.map(task => (
-              <div key={task.task_id} onClick={() => openModal(task)} style={{ padding: '8px 0', borderBottom: '1px solid #E5E7EB', cursor: 'pointer' }}>
-                <p style={{ fontWeight: 'bold' }}>{task.task_name}</p>
-                <p>Points: {task.points}</p>
-              </div>
-            ))
-          ) : (
-            <p>All tasks completed!</p>
-          )}
-        </section>
+      <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+          {/* Recent Tasks Section */}
+          <div className="overflow-hidden border bg-slate-800/50 backdrop-blur-lg border-slate-700 rounded-xl">
+            <div className="p-6 border-b border-slate-700">
+              <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
+                <span>🛸</span>
+                <span>Recent Space Missions</span>
+              </h2>
+            </div>
+            <div className="p-6 space-y-4">
+              {recentTasks.length > 0 ? (
+                recentTasks.map(task => (
+                  <div 
+                    key={task.user_task_id} 
+                    className="p-4 transition-colors border rounded-lg bg-slate-700/50 border-slate-600 hover:border-blue-400"
+                  >
+                    <h3 className="font-bold text-white">{task.task_name}</h3>
+                    <p className="text-sm text-slate-300">
+                      Mission completed: {new Date(task.completed_at).toLocaleString()}
+                    </p>
+                    <img 
+                      src={task.photo_url} 
+                      alt="Mission complete" 
+                      className="object-cover w-full mt-2 border rounded-lg border-slate-600"
+                    />
+                  </div>
+                ))
+              ) : (
+                <p className="text-slate-400">No missions completed yet, astronaut!</p>
+              )}
+            </div>
+          </div>
+
+          {/* Tasks to Complete Section */}
+          <div className="overflow-hidden border bg-slate-800/50 backdrop-blur-lg border-slate-700 rounded-xl">
+            <div className="p-6 border-b border-slate-700">
+              <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
+                <span>🎯</span>
+                <span>Pending Missions</span>
+              </h2>
+            </div>
+            <div className="p-6 space-y-4 h-[450px] overflow-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+              {notCompletedTasks.length > 0 ? (
+                notCompletedTasks.map(task => (
+                  <div
+                    key={task.task_id}
+                    onClick={() => openModal(task)}
+                    className="p-4 transition-colors border rounded-lg cursor-pointer bg-slate-700/50 border-slate-600 hover:border-blue-400"
+                  >
+                    <h3 className="font-bold text-white">{task.task_name}</h3>
+                    <p className="text-blue-400">Mission Points: {task.points}</p>
+                  </div>
+                ))
+              ) : (
+                <p className="text-slate-400">All missions completed, great work!</p>
+              )}
+            </div>
+          </div>
+        </div>
       </main>
 
+      {/* Modal */}
       {isModalOpen && selectedTask && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center'
-        }}>
-          <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '8px', width: '400px' }}>
-            <h3>{selectedTask.task_name}</h3>
-            <p>{selectedTask.description}</p>
-            <input type="file" onChange={handleFileChange} accept="image/*" />
-            <button onClick={handleSubmitTaskCompletion} style={{ marginTop: '16px', padding: '8px 16px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-              Submit
-            </button>
-            <button onClick={closeModal} style={{ marginTop: '8px', padding: '8px 16px', backgroundColor: '#DC2626', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
-              Cancel
-            </button>
-            {message && <p>{message}</p>}
+        <div className="fixed inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+          <div className="bg-slate-800 border border-slate-700 rounded-xl w-[400px] overflow-hidden">
+            <div className="p-6 border-b border-slate-700">
+              <h3 className="text-xl font-bold text-white">{selectedTask.task_name}</h3>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-slate-300">{selectedTask.description}</p>
+              <div className="space-y-4">
+                <div className="relative">
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label
+                    htmlFor="file-upload"
+                    className="flex items-center justify-center p-4 space-x-2 transition-colors border-2 border-dashed rounded-lg cursor-pointer border-slate-600 hover:border-blue-400 text-slate-300"
+                  >
+                    <span>📤</span>
+                    <span>Upload mission evidence</span>
+                  </label>
+                </div>
+                {file && (
+                  <p className="text-sm text-slate-400">Selected: {file.name}</p>
+                )}
+                {message && (
+                  <p className="text-sm text-blue-400">{message}</p>
+                )}
+                <div className="flex space-x-3">
+                  <button 
+                    onClick={handleSubmitTaskCompletion}
+                    className="flex-1 px-4 py-2 text-white transition-colors duration-200 bg-blue-600 rounded-lg hover:bg-blue-700"
+                  >
+                    Complete Mission
+                  </button>
+                  <button 
+                    onClick={closeModal}
+                    className="flex-1 px-4 py-2 text-white transition-colors duration-200 bg-red-600 rounded-lg hover:bg-red-700"
+                  >
+                    Abort
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}
