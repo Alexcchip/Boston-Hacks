@@ -6,6 +6,7 @@ import LoginForm from './components/auth/LoginForm';
 import SignupForm from './components/auth/SignupForm';
 import Dashboard from './pages/Dashboard';
 import PrivateRoute from './components/PrivateRoute';
+import Track from './pages/Track';
 
 
 const posts = [
@@ -48,6 +49,14 @@ function App() {
           element={
             <PrivateRoute>
               <Dashboard />
+            </PrivateRoute>
+          }
+        />
+        <Route 
+          path="/track"
+          element={
+            <PrivateRoute>
+              <Track />
             </PrivateRoute>
           }
         />

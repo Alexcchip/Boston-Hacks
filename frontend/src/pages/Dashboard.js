@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getToken, logout } from '../utils/auth';
+import { Link } from 'react-router-dom';
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -160,6 +161,9 @@ export default function Dashboard() {
               <span>🚪</span>
               <span>Abort Mission</span>
             </button>
+            <Link to="/track" style={{ color: '#A3BFFA', textDecoration: 'none' }}>
+              See this
+            </Link>
           </div>
         </div>
       </nav>
