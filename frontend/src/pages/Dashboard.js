@@ -171,64 +171,64 @@ export default function Dashboard() {
       <main className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {/* Recent Tasks Section */}
-          <div className="overflow-hidden border bg-slate-800/50 backdrop-blur-lg border-slate-700 rounded-xl">
-            <div className="p-6 border-b border-slate-700">
-              <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
-                <span>🛸</span>
-                <span>Recent Space Missions</span>
-              </h2>
-            </div>
-            <div className="p-6 space-y-4">
-              {recentTasks.length > 0 ? (
-                recentTasks.map(task => (
-                  <div 
-                    key={task.user_task_id} 
-                    className="p-4 transition-colors border rounded-lg bg-slate-700/50 border-slate-600 hover:border-blue-400"
-                  >
-                    <h3 className="font-bold text-white">{task.task_name}</h3>
-                    <p className="text-sm text-slate-300">
-                      Mission completed: {new Date(task.completed_at).toLocaleString()}
-                    </p>
-                    <img 
-                      src={task.photo_url} 
-                      alt="Mission complete" 
-                      className="object-cover w-full mt-2 border rounded-lg border-slate-600"
-                    />
-                  </div>
-                ))
-              ) : (
-                <p className="text-slate-400">No missions completed yet, astronaut!</p>
-              )}
-            </div>
+        <div className="overflow-hidden border bg-slate-800/50 backdrop-blur-lg border-slate-700 rounded-xl">
+          <div className="p-6 border-b border-slate-700">
+            <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
+              <span>🛸</span>
+              <span>Recent Space Missions</span>
+            </h2>
           </div>
-
-          {/* Tasks to Complete Section */}
-          <div className="overflow-hidden border bg-slate-800/50 backdrop-blur-lg border-slate-700 rounded-xl">
-            <div className="p-6 border-b border-slate-700">
-              <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
-                <span>🎯</span>
-                <span>Pending Missions</span>
-              </h2>
-            </div>
-            <div className="p-6 space-y-4 h-[450px] overflow-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
-              {notCompletedTasks.length > 0 ? (
-                notCompletedTasks.map(task => (
-                  <div
-                    key={task.task_id}
-                    onClick={() => openModal(task)}
-                    className="p-4 transition-colors border rounded-lg cursor-pointer bg-slate-700/50 border-slate-600 hover:border-blue-400"
-                  >
-                    <h3 className="font-bold text-white">{task.task_name}</h3>
-                    <p className="text-blue-400">Mission Points: {task.points}</p>
-                  </div>
-                ))
-              ) : (
-                <p className="text-slate-400">All missions completed, great work!</p>
-              )}
-            </div>
+          <div className="p-6 space-y-4 h-[400px] overflow-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+            {recentTasks.length > 0 ? (
+              recentTasks.map(task => (
+                <div 
+                  key={task.user_task_id} 
+                  className="p-4 transition-colors border rounded-lg bg-slate-700/50 border-slate-600 hover:border-blue-400"
+                >
+                  <h3 className="font-bold text-white">{task.task_name}</h3>
+                  <p className="text-sm text-slate-300">
+                    Mission completed: {new Date(task.completed_at).toLocaleString()}
+                  </p>
+                  <img 
+                    src={task.photo_url} 
+                    alt="Mission complete" 
+                    className="object-cover w-full mt-2 border rounded-lg border-slate-600"
+                  />
+                </div>
+              ))
+            ) : (
+              <p className="text-slate-400">No missions completed yet, astronaut!</p>
+            )}
           </div>
         </div>
-      </main>
+
+        {/* Tasks to Complete Section */}
+        <div className="overflow-hidden border bg-slate-800/50 backdrop-blur-lg border-slate-700 rounded-xl">
+          <div className="p-6 border-b border-slate-700">
+            <h2 className="flex items-center space-x-2 text-xl font-bold text-white">
+              <span>🎯</span>
+              <span>Pending Missions</span>
+            </h2>
+          </div>
+          <div className="p-6 space-y-4 h-[400px] overflow-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-slate-800">
+            {notCompletedTasks.length > 0 ? (
+              notCompletedTasks.map(task => (
+                <div
+                  key={task.task_id}
+                  onClick={() => openModal(task)}
+                  className="p-4 transition-colors border rounded-lg cursor-pointer bg-slate-700/50 border-slate-600 hover:border-blue-400"
+                >
+                  <h3 className="font-bold text-white">{task.task_name}</h3>
+                  <p className="text-blue-400">Mission Points: {task.points}</p>
+                </div>
+              ))
+            ) : (
+              <p className="text-slate-400">All missions completed, great work!</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </main>
 
       {/* Modal */}
       {isModalOpen && selectedTask && (
