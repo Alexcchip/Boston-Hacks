@@ -15,6 +15,8 @@ import sys
 from sqlalchemy import text
 from flasgger import Swagger
 from task_routes import task_routes
+from team_routes import team_routes
+from user_routes import user_routes
 
 # Load environment variables
 load_dotenv()
@@ -61,7 +63,8 @@ def create_app():
     db.init_app(app)
 
     app.register_blueprint(task_routes)  # Register the task routes
-
+    app.register_blueprint(team_routes)
+    app.register_blueprint(user_routes)
     app.config['SWAGGER'] = {
         'title': 'Astronaut Task API',
         'uiversion': 3,
