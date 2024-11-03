@@ -7,7 +7,10 @@ from datetime import datetime
 from models import db, User, Tasks, UserTasks
 from functools import wraps
 from flask_jwt_extended import verify_jwt_in_request
+from dotenv import load_dotenv
 
+
+load_dotenv()
 
 def jwt_optional(fn):
     @wraps(fn)
@@ -20,7 +23,12 @@ def jwt_optional(fn):
     return wrapper
 
 # Initialize S3 client
-s3_client = boto3.client("s3", region_name=os.getenv("AWS_REGION"))
+s3_client = boto3.client(
+    "s3",
+    region_name=os.getenv("AWS_REGION"),
+    aws_access_key_id=os.getenv("AWS_ACCESS_KEY_ID"),
+    aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY")
+)
 S3_BUCKET_NAME = os.getenv("S3_BUCKET_NAME", "astronaut-app-images-bucket")
 
 # Create a Blueprint for task routes
