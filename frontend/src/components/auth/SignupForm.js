@@ -14,7 +14,7 @@ export default function SignupForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('http://snapstronaut.tech/api/register', {
+      const response = await fetch('https://snapstronaut.tech/api/register', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

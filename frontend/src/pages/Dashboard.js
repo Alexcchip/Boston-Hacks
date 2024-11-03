@@ -86,13 +86,13 @@ export default function Dashboard() {
     const loadData = async () => {
       try {
         const [userResponse, recentResponse, notCompletedResponse] = await Promise.all([
-          fetch('http://snapstronaut.tech/api/protected', {
+          fetch('https://snapstronaut.tech/api/protected', {
             headers: { 'Authorization': `Bearer ${getToken()}` }
           }),
-          fetch('http://snapstronaut.tech/api/user-tasks/recent/5', {
+          fetch('https://snapstronaut.tech/api/user-tasks/recent/5', {
             headers: { 'Authorization': `Bearer ${getToken()}` }
           }),
-          fetch('http://snapstronaut.tech/api/tasks/not-completed', {
+          fetch('https://snapstronaut.tech/api/tasks/not-completed', {
             headers: { 'Authorization': `Bearer ${getToken()}` }
           })
         ]);
@@ -152,7 +152,7 @@ export default function Dashboard() {
 
     try {
       // Step 1: Request a pre-signed URL for file upload
-      const presignedResponse = await fetch('http://snapstronaut.tech/api/generate-presigned-url', {
+      const presignedResponse = await fetch('https://snapstronaut.tech/api/generate-presigned-url', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ export default function Dashboard() {
       });
 
       // Step 3: Mark task as completed
-      await fetch(`http://snapstronaut.tech/api/tasks/${selectedTask.task_id}/complete`, {
+      await fetch(`https://snapstronaut.tech/api/tasks/${selectedTask.task_id}/complete`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -183,10 +183,10 @@ export default function Dashboard() {
       
       // Refresh data after completion
       const [recentData, notCompletedData] = await Promise.all([
-        fetch('http://snapstronaut.tech/api/user-tasks/recent/5', {
+        fetch('https://snapstronaut.tech/api/user-tasks/recent/5', {
           headers: { 'Authorization': `Bearer ${getToken()}` }
         }).then(res => res.json()),
-        fetch('http://snapstronaut.tech/api/tasks/not-completed', {
+        fetch('https://snapstronaut.tech/api/tasks/not-completed', {
           headers: { 'Authorization': `Bearer ${getToken()}` }
         }).then(res => res.json())
       ]);

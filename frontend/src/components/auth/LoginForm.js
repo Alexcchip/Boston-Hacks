@@ -11,7 +11,7 @@
     const handleSubmit = async (e) => {
       e.preventDefault();
       try {
-        const response = await fetch('http://snapstronaut.tech/api/login', {
+        const response = await fetch('https://snapstronaut.tech/api/login', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
