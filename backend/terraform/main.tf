@@ -275,6 +275,6 @@ resource "aws_db_instance" "astronaut_db" {
   allocated_storage = 20
   username         = "dbadmin"
   publicly_accessible    = true
-  password         = var.db_password  # Securely pulls from the environment
+  password         = var.db_password  
   skip_final_snapshot = true
 }

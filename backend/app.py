@@ -26,7 +26,7 @@ def create_app():
     app = Flask(__name__)
     
     # Configure CORS
-    CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers=["Content-Type", "Authorization"])
+    CORS(app, resources={r"/*": {"origins": "*"}}, allow_headers="*")
 
     
     # Database Configuration for PostgreSQL
